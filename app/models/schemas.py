@@ -22,9 +22,13 @@ class CompanyProfile(BaseModel):
 
 class IntelligenceReport(BaseModel):
     company_profile: CompanyProfile
+    infrastructure: InfrastructureInfo 
     technologies: List[str] = []
     services: List[str] = []
     contact_details: ContactInfo
-    # UPDATED: We use List[Dict[str, Any]] to allow flexible fields like 'profile_url'
     key_people: List[Dict[str, Any]] = [] 
     sources: List[str] = []
+    
+class InfrastructureInfo(BaseModel):
+    email_provider: str = "Unknown"
+    cloud_hosting: List[str] = []

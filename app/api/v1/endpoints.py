@@ -1,7 +1,8 @@
 from fastapi import APIRouter
-from app.models.schemas import ScanRequest, IntelligenceReport
+from app.models.schemas import ScanRequest, IntelligenceReport, InfrastructureInfo
 from app.services.scraper import AsyncScraper
 from app.services.search_engine import DomainHunter, CompanySocialsHunter, EmployeeHunter
+from app.services.infrastructure import InfrastructureHunter # <-- Import New Service
 from app.services.llm_engine import LLMEngine
 import logging
 
@@ -10,41 +11,54 @@ logger = logging.getLogger("API_Endpoint")
 
 @router.post("/enrich", response_model=IntelligenceReport)
 async def enrich_company(request: ScanRequest):
-    logger.info(f"🚀 Starting Cost-Efficient Scan for: {request.company_name}")
+    logger.info(f"🚀 Starting Deep-Scan for: {request.company_name}")
     
     # Initialize
     scraper = AsyncScraper()
     llm = LLMEngine()
     
-    # 1. Domain (1 Credit ONLY if URL missing)
+    # 1. Domain
     target_url = request.website_url
     if not target_url:
-        logger.info("URL missing. Searching...")
         target_url = DomainHunter(request.company_name).get_domain()
     
-    # 2. Scrape Website (0 Credits)
+    # 2. Infrastructure Scan (The New "Detective" Work)
+    # This is fast and cheap, so we do it early
+    infra_data = InfrastructureInfo(email_provider="Unknown", cloud_hosting=[])
+    if target_url:
+        logger.info(f"🕵️ Scanning Infrastructure for {target_url}...")
+        infra_hunter = InfrastructureHunter(target_url)
+        
+        # Get Email Provider (MX Records)
+        email_provider = infra_hunter.detect_email_provider()
+        
+        # Get Server Tech (HTTP Headers)
+        server_tech = await infra_hunter.detect_server_tech(target_url)
+        
+        infra_data = InfrastructureInfo(
+            email_provider=email_provider,
+            cloud_hosting=server_tech
+        )
+
+    # 3. Scrape Website
     scraped_data = {"technologies": [], "emails": [], "phones": [], "raw_text": ""}
     socials_hunter = CompanySocialsHunter(request.company_name)
     
     if target_url:
-        logger.info(f"Scraping {target_url}...")
         html = await scraper.fetch_page(target_url)
         scraped_data = scraper.extract_data(html)
-        
-        # FREE: Extract socials from the website footer/header
         socials_hunter.extract_from_html(html)
     
-    # 3. Fill Missing Data (Paid API)
-    # Only searches if LinkedIn wasn't found in the scrape
-    socials = socials_hunter.run_backup_search() 
+    # 4. Fill Missing Data (Paid API)
+    socials = socials_hunter.run_backup_search()
     
-    # 4. Employees (1 Credit - Combined Query)
+    # 5. Employees
     employees = EmployeeHunter(request.company_name).run()
 
-    # 5. AI Analysis
+    # 6. AI Analysis
     ai_insights = await llm.analyze(request.company_name, scraped_data, [])
 
-    # 6. Merge
+    # 7. Merge
     profile = ai_insights.get("company_profile", {})
     profile["name"] = request.company_name
     profile["website"] = target_url if target_url else "Not Found"
@@ -58,6 +72,7 @@ async def enrich_company(request: ScanRequest):
 
     return {
         "company_profile": profile,
+        "infrastructure": infra_data, # <-- New Data Block
         "technologies": scraped_data["technologies"],
         "services": ai_insights.get("services_offered", []),
         "contact_details": {
