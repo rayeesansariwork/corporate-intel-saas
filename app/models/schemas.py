@@ -10,6 +10,10 @@ class ContactInfo(BaseModel):
     phones: List[str] = []
     social_links: Dict[str, str] = {}
     addresses: List[str] = []
+    
+class InfrastructureInfo(BaseModel):
+    email_provider: str = "Unknown"
+    cloud_hosting: List[str] = []
 
 class CompanyProfile(BaseModel):
     name: str
@@ -28,7 +32,4 @@ class IntelligenceReport(BaseModel):
     contact_details: ContactInfo
     key_people: List[Dict[str, Any]] = [] 
     sources: List[str] = []
-    
-class InfrastructureInfo(BaseModel):
-    email_provider: str = "Unknown"
-    cloud_hosting: List[str] = []
+
