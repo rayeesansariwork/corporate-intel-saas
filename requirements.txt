@@ -6,3 +6,4 @@ duckduckgo-search>=6.0.0
 pydantic-settings>=2.0.0
 python-dotenv>=1.0.0
 tenacity>=8.2.0  # For automatic retries on failure
+requests
