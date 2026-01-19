@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     
     # Search Engine (Serper.dev)
     # I have added your key here as the default
-    SERPER_API_KEY: str = "fdf84cb487f69056467b4c03601f47a9ad807502" 
+    SERPER_API_KEY: str 
 
     # Scraper Headers
     USER_AGENT: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
