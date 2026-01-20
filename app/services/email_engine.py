@@ -62,45 +62,56 @@ class EmailPermutator:
 
 class EmailValidator:
     def __init__(self):
-        # Ensure this URL matches your actual Ngrok or VPS URL
+        # Ensure this matches your Ngrok URL
         self.validator_url = "https://beautifully-unpleasing-chasidy.ngrok-free.dev/verify/bulk/stream"
 
     async def find_valid_email(self, email_list: list):
         """
-        Streams email candidates to Reacher and returns the first SAFE one.
+        Streams email candidates to Validator and returns the first SAFE one.
+        Handles SSE format (data: {...})
         """
         if not email_list:
             return None
 
+        # Format for your 'BulkEmailRequest' model
         payload = {"emails": email_list}
+        
         found_email = None
         risky_email = None
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                # stream=True processes results line-by-line
                 async with client.stream("POST", self.validator_url, json=payload) as response:
                     async for line in response.aiter_lines():
                         if not line: continue
                         
-                        try:
-                            result = json.loads(line)
-                            email = result.get("input")
-                            status = result.get("is_reachable")
+                        # --- FIX: Handle SSE "data: " prefix ---
+                        if line.startswith("data: "):
+                            clean_line = line[6:].strip() # Remove 'data: '
                             
-                            # STOP immediately if we find a 'safe' email
-                            if status == "safe":
-                                logger.info(f"✅ Found SAFE email: {email}")
-                                return {"email": email, "status": "safe", "score": 100}
+                            if clean_line == "[DONE]": 
+                                break # End of stream
                             
-                            # Backup 'risky' just in case
-                            if status == "risky" and not risky_email:
-                                risky_email = {"email": email, "status": "risky", "score": 50}
+                            try:
+                                result = json.loads(clean_line)
+                                email = result.get("email") or result.get("input")
+                                status = result.get("is_reachable")
+                                
+                                # LOGIC: Stop immediately if 'safe'
+                                if status == "safe":
+                                    logger.info(f"✅ Found SAFE email: {email}")
+                                    return {"email": email, "status": "safe", "score": 100}
+                                
+                                # Backup 'risky'
+                                if status == "risky" and not risky_email:
+                                    risky_email = {"email": email, "status": "risky", "score": 50}
 
-                        except json.JSONDecodeError:
-                            continue
+                            except json.JSONDecodeError:
+                                logger.warning(f"Failed to parse JSON: {clean_line}")
+                                continue
+                        # ----------------------------------------
 
-            # If no 'safe' email found, return 'risky' if available
+            # If stream finishes without 'safe', return 'risky'
             if risky_email:
                 logger.info(f"⚠️ Returning RISKY email: {risky_email['email']}")
                 return risky_email
