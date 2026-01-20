@@ -1,3 +1,8 @@
+from app.services.pattern_engine import PatternEngine
+from app.services.email_engine import EmailValidator
+from app.services.email_engine import EmailPermutator
+from app.models.schemas import EmailRevealRequest
+from app.models.schemas import EmailRevealResponse
 from fastapi import APIRouter
 from app.models.schemas import ScanRequest, IntelligenceReport, InfrastructureInfo
 from app.services.scraper import AsyncScraper
