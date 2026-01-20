@@ -67,7 +67,10 @@ async def enrich_company(request: ScanRequest):
     socials = socials_hunter.run_backup_search()
     
     # 5. Employees
-    employees = EmployeeHunter(request.company_name).run()
+    employees = EmployeeHunter(
+        request.company_name, 
+        target_role=request.target_role
+    ).run()
 
     # 6. AI Analysis
     ai_insights = await llm.analyze(request.company_name, scraped_data, [])

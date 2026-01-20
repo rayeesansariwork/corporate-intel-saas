@@ -4,6 +4,7 @@ from typing import List, Optional, Dict, Any
 class ScanRequest(BaseModel):
     company_name: str = Field(..., min_length=2, example="OpenAI")
     website_url: Optional[str] = Field(None, example="openai.com")
+    target_role: Optional[str] = None
 
 class ContactInfo(BaseModel):
     emails: List[str] = []

@@ -89,20 +89,26 @@ class CompanySocialsHunter:
         return self.results
 
 class EmployeeHunter:
-    def __init__(self, company_name, max_results=10):
+    def __init__(self, company_name, target_role=None, max_results=10):
         self.company_name = company_name
+        self.target_role = target_role 
         self.max_results = max_results
         self.associates = []
         self.seen_urls = set()
 
     def run(self):
-        # OPTIMIZATION: Combine queries into ONE request using OR
-        # This reduces API cost from 3-4 credits down to 1-2 credits
-        combined_query = f'site:linkedin.com/in/ "{self.company_name}" ("Founder" OR "CEO" OR "Manager" OR "Director")'
+        # 2. Logic Switch: If specific role is provided, search ONLY for that.
+        # Otherwise, default to leadership roles.
+        if self.target_role and self.target_role.strip():
+            role_query = f'"{self.target_role}"'
+            logger.info(f"🕵️ Hunting specific target '{self.target_role}' for {self.company_name}...")
+        else:
+            role_query = '("Founder" OR "CEO" OR "Manager" OR "Director")'
+            logger.info(f"🕵️ Hunting leadership for {self.company_name}...")
+
+        combined_query = f'site:linkedin.com/in/ "{self.company_name}" {role_query}'
         
-        logger.info(f"🕵️ Hunting employees for {self.company_name} (Combined Search)...")
-        
-        # 1 Credit (returns up to 10 people at once)
+        # 1 Credit (returns up to 15 people at once)
         results = SearchUtils.google_search(combined_query, count=15)
         
         for r in results:
