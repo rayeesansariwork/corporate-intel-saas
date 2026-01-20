@@ -33,3 +33,11 @@ class IntelligenceReport(BaseModel):
     key_people: List[Dict[str, Any]] = [] 
     sources: List[str] = []
 
+class EmailRevealRequest(BaseModel):
+    full_name: str
+    domain: str
+
+class EmailRevealResponse(BaseModel):
+    email: Optional[str] = None
+    status: str = "unknown" # safe, risky, unknown
+    confidence_score: int = 0

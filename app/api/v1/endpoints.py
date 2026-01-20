@@ -84,3 +84,58 @@ async def enrich_company(request: ScanRequest):
         "key_people": final_people,
         "sources": [target_url if target_url else "Google Serper"]
     }
+
+
+@router.post("/reveal-email", response_model=EmailRevealResponse)
+async def reveal_email(request: EmailRevealRequest):
+    """
+    On-Demand Email Discovery with Smart Learning.
+    1. Generates permutations (prioritizing known patterns).
+    2. Validates via Reacher.
+    3. If successful, LEARNS the pattern for next time.
+    """
+    logger.info(f"🔍 Revealing email for: {request.full_name} @ {request.domain}")
+    
+    # 1. Generate Candidates
+    permutator = EmailPermutator()
+    candidates = permutator.generate(request.full_name, request.domain)
+    
+    if not candidates:
+        return {"status": "failed", "email": None, "confidence_score": 0}
+
+    # 2. Validate
+    validator = EmailValidator()
+    result = await validator.find_valid_email(candidates)
+    
+    if result and result["status"] == "safe":
+        # --- SMART LEARNING LOGIC ---
+        try:
+            parts = request.full_name.lower().strip().split()
+            if len(parts) >= 2:
+                fn, ln = parts[0], parts[-1]
+                
+                # Deduce the pattern from the valid email
+                pattern = PatternEngine.deduce_pattern(result["email"], fn, ln, request.domain)
+                
+                # Save it to our 'Database'
+                if pattern:
+                    PatternEngine.save_pattern(request.domain, pattern)
+        except Exception as e:
+            logger.warning(f"Failed to learn pattern: {e}")
+        # -----------------------------
+
+        return {
+            "email": result["email"],
+            "status": result["status"],
+            "confidence_score": result["score"]
+        }
+    
+    # If a risky email was found, return it but don't learn from it (safer)
+    if result:
+         return {
+            "email": result["email"],
+            "status": result["status"],
+            "confidence_score": result["score"]
+        }
+    
+    return {"email": None, "status": "not_found", "confidence_score": 0}
