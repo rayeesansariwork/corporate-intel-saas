@@ -1,3 +1,4 @@
+from app.services.tech_hunter import TechHunter
 from app.services.pattern_engine import PatternEngine
 from app.services.email_engine import EmailValidator
 from app.services.email_engine import EmailPermutator
@@ -53,6 +54,14 @@ async def enrich_company(request: ScanRequest):
         html = await scraper.fetch_page(target_url)
         scraped_data = scraper.extract_data(html)
         socials_hunter.extract_from_html(html)
+
+        # Run the Marketing Tech Hunter
+        tech_hunter = TechHunter()
+        marketing_tech = tech_hunter.scan(html)
+        
+        # Merge with existing scraping results (remove duplicates)
+        current_tech = scraped_data.get("technologies", [])
+        scraped_data["technologies"] = list(set(current_tech + marketing_tech))
     
     # 4. Fill Missing Data (Paid API)
     socials = socials_hunter.run_backup_search()
