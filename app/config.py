@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     MISTRAL_API_KEY: str
     MISTRAL_MODEL: str = "mistral-small-latest"
 
-    save_enrichment_url: str
-    save_enrichment_token: str
+    SAVE_ENRICHMENT_URL: str
+    SAVE_ENRICHMENT_TOKEN: str
     
     # Search Engine (Serper.dev)
     # I have added your key here as the default

@@ -6,6 +6,7 @@ from app.models.schemas import (
     ScanRequest, IntelligenceReport, InfrastructureInfo, 
     EmailRevealRequest, EmailRevealResponse
 )
+from app.config import settings
 from app.services.scraper import AsyncScraper
 from app.services.search_engine import DomainHunter, CompanySocialsHunter, EmployeeHunter
 from app.services.infrastructure import InfrastructureHunter
@@ -20,10 +21,6 @@ logger = logging.getLogger("API_Endpoint")
 # CONFIG: Your Master CRM (Django) details
 MASTER_CRM_URL = os.getenv("MASTER_CRM_URL", "https://sales.polluxa.com/api/internal/ingest-lead")
 MASTER_API_KEY = os.getenv("MASTER_API_KEY", "change_this_to_your_secret_key")
-
-# CONFIG: Save Enrichment Data Endpoint
-SAVE_ENRICHMENT_URL = os.getenv("SAVE_ENRICHMENT_URL", "http://127.0.0.1:8000/api/v1/companies/save_enrichment_data/")
-SAVE_ENRICHMENT_TOKEN = os.getenv("SAVE_ENRICHMENT_TOKEN", "")
 
 def mask_email(email):
     """Turns 'kumar@gravityer.com' into 'k****@gravityer.com'"""
@@ -65,9 +62,9 @@ async def save_enrichment_data(data: dict):
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                SAVE_ENRICHMENT_URL,
+                settings.SAVE_ENRICHMENT_URL,
                 json=data,
-                headers={"Authorization": f"Bearer {SAVE_ENRICHMENT_TOKEN}"},
+                headers={"Authorization": f"Bearer {settings.SAVE_ENRICHMENT_TOKEN}"},
                 timeout=15
             )
             if response.status_code < 300:
@@ -170,7 +167,7 @@ async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks
     # Construct the Public Report (Masked)
     public_report = {
         "company_profile": profile,
-        "infrastructure": infra_data,
+        "infrastructure": infra_data.model_dump() if hasattr(infra_data, 'model_dump') else infra_data,
         "technologies": scraped_data["technologies"],
         "services": ai_insights.get("services_offered", []),
         "contact_details": {
