@@ -12,7 +12,9 @@ class Settings(BaseSettings):
     MISTRAL_MODEL: str = "mistral-small-latest"
 
     SAVE_ENRICHMENT_URL: str
-    SAVE_ENRICHMENT_TOKEN: str
+    SAVE_ENRICHMENT_EMAIL: str
+    SAVE_ENRICHMENT_PASSWORD: str
+    TOKEN_OBTAIN_URL: str
     
     # Search Engine (Serper.dev)
     # I have added your key here as the default

@@ -15,9 +15,17 @@ from app.services.llm_engine import LLMEngine
 from app.services.email_engine import EmailValidator, EmailPermutator
 from app.services.pattern_engine import PatternEngine
 from app.services.tech_hunter import TechHunter
+from app.services.token_manager import TokenManager
 
 router = APIRouter()
 logger = logging.getLogger("API_Endpoint")
+
+# Initialize Token Manager for dynamic authentication
+token_manager = TokenManager(
+    token_url=settings.TOKEN_OBTAIN_URL,
+    email=settings.SAVE_ENRICHMENT_EMAIL,
+    password=settings.SAVE_ENRICHMENT_PASSWORD
+)
 
 # CONFIG: Your Master CRM (Django) details
 MASTER_CRM_URL = os.getenv("MASTER_CRM_URL", "https://salesapi.gravityer.com/api/v1/companies/save_enrichment_data/")
@@ -60,13 +68,17 @@ async def save_enrichment_data(data: dict):
     """
     Background Task: Sends enrichment data to the save_enrichment_data endpoint
     with JWT authentication for validation and storage.
+    Uses TokenManager for automatic token refresh.
     """
     try:
+        # Get fresh token dynamically
+        token = await token_manager.get_valid_token()
+        
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 settings.SAVE_ENRICHMENT_URL,
                 json=data,
-                headers={"Authorization": f"Bearer {settings.SAVE_ENRICHMENT_TOKEN}"},
+                headers={"Authorization": f"Bearer {token}"},
                 timeout=15
             )
             if response.status_code < 300:
