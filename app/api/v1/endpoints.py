@@ -64,30 +64,80 @@ async def push_asset_to_master_db(data: dict):
         logger.error(f"❌ Asset Push Error: {type(e).__name__}: {str(e)}")
         logger.error(f"Full traceback: {traceback.format_exc()}")
 
-async def save_enrichment_data(data: dict):
+async def save_enrichment_data(company_data: dict, contact: dict):
     """
-    Background Task: Sends enrichment data to the save_enrichment_data endpoint
-    with JWT authentication for validation and storage.
+    Background Task: Sends individual contact enrichment data to the save endpoint.
+    Each contact with a verified email gets its own database record.
     Uses TokenManager for automatic token refresh.
     """
     try:
         # Get fresh token dynamically
         token = await token_manager.get_valid_token()
         
+        # Prepare contact payload with company context
+        payload = {
+            "company_profile": company_data.get("company_profile"),
+            "infrastructure": company_data.get("infrastructure"),
+            "technologies": company_data.get("technologies"),
+            "services": company_data.get("services"),
+            "contact_details": company_data.get("contact_details"),
+            "key_people": [contact],  # Single contact
+            "sources": company_data.get("sources")
+        }
+        
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 settings.SAVE_ENRICHMENT_URL,
-                json=data,
+                json=payload,
                 headers={"Authorization": f"Bearer {token}"},
                 timeout=15
             )
             if response.status_code < 300:
-                logger.info(f"✅ Enrichment Data Saved: {data.get('company_profile', {}).get('name')}")
+                logger.info(
+                    f"✅ Contact Saved: {contact.get('name')} @ "
+                    f"{company_data.get('company_profile', {}).get('name')}"
+                )
             else:
-                logger.warning(f"⚠️ Enrichment Save Failed: {response.status_code} - {response.text}")
+                logger.warning(
+                    f"⚠️ Contact Save Failed ({contact.get('name')}): "
+                    f"{response.status_code} - {response.text}"
+                )
     except Exception as e:
-        logger.error(f"❌ Enrichment Save Error: {type(e).__name__}: {str(e)}")
+        logger.error(
+            f"❌ Contact Save Error ({contact.get('name', 'Unknown')}): "
+            f"{type(e).__name__}: {str(e)}"
+        )
         logger.error(f"Full traceback: {traceback.format_exc()}")
+
+
+async def save_all_enriched_contacts(company_data: dict):
+    """
+    Saves all contacts with verified emails to the database.
+    Sends one API request per contact to ensure all are stored.
+    """
+    key_people = company_data.get("key_people", [])
+    verified_contacts = [
+        person for person in key_people 
+        if person.get("email_status") == "verified"
+    ]
+    
+    if not verified_contacts:
+        logger.info(f"⚠️ No verified contacts to save for {company_data.get('company_profile', {}).get('name')}")
+        return
+    
+    logger.info(
+        f"💾 Saving {len(verified_contacts)} verified contacts for "
+        f"{company_data.get('company_profile', {}).get('name')}"
+    )
+    
+    # Send each contact individually
+    tasks = [
+        save_enrichment_data(company_data, contact)
+        for contact in verified_contacts
+    ]
+    
+    # Execute all saves concurrently
+    await asyncio.gather(*tasks, return_exceptions=True)
 
 @router.post("/enrich", response_model=IntelligenceReport)
 async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks):
@@ -203,9 +253,9 @@ async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks
     # --- 8. FIRE AND FORGET SAVE ---
     background_tasks.add_task(push_asset_to_master_db, asset_report)
     
-    # --- 9. AUTO-SAVE ENRICHMENT DATA ---
-    # Send the public report to the save_enrichment_data endpoint
-    background_tasks.add_task(save_enrichment_data, public_report)
+    # --- 9. AUTO-SAVE ALL ENRICHED CONTACTS ---
+    # Send each verified contact individually to ensure all are stored
+    background_tasks.add_task(save_all_enriched_contacts, public_report)
 
     return public_report
 
