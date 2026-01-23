@@ -1,6 +1,7 @@
 import httpx
 import os
 import logging
+import traceback
 from fastapi import APIRouter, BackgroundTasks
 from app.models.schemas import (
     ScanRequest, IntelligenceReport, InfrastructureInfo, 
@@ -52,7 +53,8 @@ async def push_asset_to_master_db(data: dict):
             else:
                 logger.warning(f"⚠️ Master DB Save Failed: {response.status_code} - {response.text}")
     except Exception as e:
-        logger.error(f"❌ Asset Push Error: {e}")
+        logger.error(f"❌ Asset Push Error: {type(e).__name__}: {str(e)}")
+        logger.error(f"Full traceback: {traceback.format_exc()}")
 
 async def save_enrichment_data(data: dict):
     """
@@ -72,7 +74,8 @@ async def save_enrichment_data(data: dict):
             else:
                 logger.warning(f"⚠️ Enrichment Save Failed: {response.status_code} - {response.text}")
     except Exception as e:
-        logger.error(f"❌ Enrichment Save Error: {e}")
+        logger.error(f"❌ Enrichment Save Error: {type(e).__name__}: {str(e)}")
+        logger.error(f"Full traceback: {traceback.format_exc()}")
 
 @router.post("/enrich", response_model=IntelligenceReport)
 async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks):
