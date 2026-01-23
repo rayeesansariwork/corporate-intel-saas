@@ -21,6 +21,10 @@ logger = logging.getLogger("API_Endpoint")
 MASTER_CRM_URL = os.getenv("MASTER_CRM_URL", "https://sales.polluxa.com/api/internal/ingest-lead")
 MASTER_API_KEY = os.getenv("MASTER_API_KEY", "change_this_to_your_secret_key")
 
+# CONFIG: Save Enrichment Data Endpoint
+SAVE_ENRICHMENT_URL = os.getenv("SAVE_ENRICHMENT_URL", "http://127.0.0.1:8000/api/v1/companies/save_enrichment_data/")
+SAVE_ENRICHMENT_TOKEN = os.getenv("SAVE_ENRICHMENT_TOKEN", "")
+
 def mask_email(email):
     """Turns 'kumar@gravityer.com' into 'k****@gravityer.com'"""
     if not email or "@" not in email: return None
@@ -52,6 +56,26 @@ async def push_asset_to_master_db(data: dict):
                 logger.warning(f"⚠️ Master DB Save Failed: {response.status_code} - {response.text}")
     except Exception as e:
         logger.error(f"❌ Asset Push Error: {e}")
+
+async def save_enrichment_data(data: dict):
+    """
+    Background Task: Sends enrichment data to the save_enrichment_data endpoint
+    with JWT authentication for validation and storage.
+    """
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                SAVE_ENRICHMENT_URL,
+                json=data,
+                headers={"Authorization": f"Bearer {SAVE_ENRICHMENT_TOKEN}"},
+                timeout=15
+            )
+            if response.status_code < 300:
+                logger.info(f"✅ Enrichment Data Saved: {data.get('company_profile', {}).get('name')}")
+            else:
+                logger.warning(f"⚠️ Enrichment Save Failed: {response.status_code} - {response.text}")
+    except Exception as e:
+        logger.error(f"❌ Enrichment Save Error: {e}")
 
 @router.post("/enrich", response_model=IntelligenceReport)
 async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks):
@@ -166,6 +190,10 @@ async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks
 
     # --- 8. FIRE AND FORGET SAVE ---
     background_tasks.add_task(push_asset_to_master_db, asset_report)
+    
+    # --- 9. AUTO-SAVE ENRICHMENT DATA ---
+    # Send the public report to the save_enrichment_data endpoint
+    background_tasks.add_task(save_enrichment_data, public_report)
 
     return public_report
 
