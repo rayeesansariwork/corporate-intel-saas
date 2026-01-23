@@ -128,9 +128,9 @@ async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks
     master_db_employees = [p.copy() for p in employees]
 
     if clean_domain:
-        logger.info(f"🕵️ Auto-Enriching Top 5 Employees @ {clean_domain}")
-        # Only check the first 5 to save time/credits
-        for i, person in enumerate(employees[:5]):
+        logger.info(f"🕵️ Auto-Enriching All Employees @ {clean_domain}")
+        # Validate ALL employees to save complete contact data
+        for i, person in enumerate(employees):
             # Generate & Validate
             candidates = email_engine.generate(person['name'], clean_domain)
             result = await validator.find_valid_email(candidates)
