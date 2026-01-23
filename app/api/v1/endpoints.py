@@ -19,8 +19,8 @@ router = APIRouter()
 logger = logging.getLogger("API_Endpoint")
 
 # CONFIG: Your Master CRM (Django) details
-MASTER_CRM_URL = os.getenv("MASTER_CRM_URL", "https://sales.polluxa.com/api/internal/ingest-lead")
-MASTER_API_KEY = os.getenv("MASTER_API_KEY", "change_this_to_your_secret_key")
+MASTER_CRM_URL = os.getenv("MASTER_CRM_URL", "https://salesapi.gravityer.com/api/v1/companies/save_enrichment_data/")
+MASTER_API_KEY = os.getenv("MASTER_API_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY5MTcxNzk2LCJpYXQiOjE3NjkxNDI5OTYsImp0aSI6IjkxMmFlMzM0ZTgyZDQzYTM5YWUxYmIwNmUxMGNhNzA0IiwidXNlcl9pZCI6MSwiYnVzaW5lc3NfcmVjb3JkX2lkIjpudWxsLCJtYXN0ZXJfYWRtaW4iOnRydWV9.b1BYVEndhPXz8x_FL7629OkSOjjw1_k-H7x2iA30Hq4")
 
 def mask_email(email):
     """Turns 'kumar@gravityer.com' into 'k****@gravityer.com'"""
