@@ -48,12 +48,12 @@ def setup_logging():
     root_logger.addHandler(console_handler)
     
     # Set levels for noisy third-party libraries
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    logging.getLogger("httpcore").setLevel(logging.WARNING)
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    # logging.getLogger("httpx").setLevel(logging.WARNING)
+    # logging.getLogger("httpcore").setLevel(logging.WARNING)
+    # logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+    # logging.getLogger("urllib3").setLevel(logging.WARNING)
     
-    logging.info("=" * 80)
-    logging.info("🚀 Logging system initialized")
-    logging.info(f"📁 Log file: {log_file}")
-    logging.info("=" * 80)
+    # logging.info("=" * 80)
+    # logging.info("🚀 Logging system initialized")
+    # logging.info(f"📁 Log file: {log_file}")
+    # logging.info("=" * 80)
