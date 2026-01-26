@@ -1,0 +1,258 @@
+2026-01-26 12:33:36 | INFO     | root                 | setup_logging        | Line:56   | ================================================================================
+2026-01-26 12:33:36 | INFO     | root                 | setup_logging        | Line:57   | 🚀 Logging system initialized
+2026-01-26 12:33:36 | INFO     | root                 | setup_logging        | Line:58   | 📁 Log file: logs\app_20260126.log
+2026-01-26 12:33:36 | INFO     | root                 | setup_logging        | Line:59   | ================================================================================
+2026-01-26 12:33:39 | INFO     | API_Endpoint         | enrich_company       | Line:145  | 🚀 Starting Deep-Scan for: gravity engineering services
+2026-01-26 12:33:41 | WARNING  | Infrastructure_Hunter | detect_server_tech   | Line:74   | Header scan failed: Request URL is missing an 'http://' or 'https://' protocol.
+2026-01-26 12:33:41 | DEBUG    | ScraperService       | fetch_page           | Line:23   | Added https:// protocol to URL: https://gravityer.com
+2026-01-26 12:33:41 | INFO     | ScraperService       | fetch_page           | Line:25   | 🌐 Fetching page: https://gravityer.com
+2026-01-26 12:33:43 | INFO     | ScraperService       | fetch_page           | Line:30   | ✅ Successfully fetched https://gravityer.com (256332 characters, status: 200)
+2026-01-26 12:33:43 | DEBUG    | ScraperService       | extract_data         | Line:43   | Starting data extraction from HTML (256332 characters)
+2026-01-26 12:33:43 | DEBUG    | ScraperService       | extract_data         | Line:82   | Detected technology: React
+2026-01-26 12:33:43 | INFO     | ScraperService       | extract_data         | Line:84   | 📊 Extraction complete: 0 emails, 0 phones, 1 technologies detected
+2026-01-26 12:33:43 | INFO     | Tech_Hunter          | scan                 | Line:56   | 🕵️ Detected Tech: LinkedIn Insights, Google Analytics 4, Vercel
+2026-01-26 12:33:43 | INFO     | Google_Search_Engine | run                  | Line:107  | 🕵️ Hunting leadership for gravity engineering services...
+2026-01-26 12:33:45 | INFO     | API_Endpoint         | enrich_company       | Line:194  | 🕵️ Auto-Enriching All Employees @ gravityer.com
+2026-01-26 12:33:45 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Kumar Gaurav @ gravityer.com
+2026-01-26 12:33:45 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:33:45 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for kumar gaurav
+2026-01-26 12:33:45 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:33:45 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['kumar@gravityer.com', 'kumar.gaurav@gravityer.com', 'kumargaurav@gravityer.com', 'kgaurav@gravityer.com', 'k.gaurav@gravityer.com', 'kumarg@gravityer.com', 'kumar.g@gravityer.com', 'gaurav@gravityer.com', 'gaurav.kumar@gravityer.com', 'gauravkumar@gravityer.com', 'kumar_gaurav@gravityer.com', 'kumar-gaurav@gravityer.com', 'k-gaurav@gravityer.com', 'kumar-g@gravityer.com']
+2026-01-26 12:33:45 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:33:45 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Haseeb Haroon @ gravityer.com
+2026-01-26 12:33:45 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:33:45 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for haseeb haroon
+2026-01-26 12:33:45 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:33:45 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['haseeb@gravityer.com', 'haseeb.haroon@gravityer.com', 'haseebharoon@gravityer.com', 'hharoon@gravityer.com', 'h.haroon@gravityer.com', 'haseebh@gravityer.com', 'haseeb.h@gravityer.com', 'haroon@gravityer.com', 'haroon.haseeb@gravityer.com', 'haroonhaseeb@gravityer.com', 'haseeb_haroon@gravityer.com', 'haseeb-haroon@gravityer.com', 'h-haroon@gravityer.com', 'haseeb-h@gravityer.com']
+2026-01-26 12:33:46 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:33:46 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Puja Rai @ gravityer.com
+2026-01-26 12:33:46 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:33:46 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for puja rai
+2026-01-26 12:33:46 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:33:46 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['puja@gravityer.com', 'puja.rai@gravityer.com', 'pujarai@gravityer.com', 'prai@gravityer.com', 'p.rai@gravityer.com', 'pujar@gravityer.com', 'puja.r@gravityer.com', 'rai@gravityer.com', 'rai.puja@gravityer.com', 'raipuja@gravityer.com', 'puja_rai@gravityer.com', 'puja-rai@gravityer.com', 'p-rai@gravityer.com', 'puja-r@gravityer.com']
+2026-01-26 12:33:46 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:33:46 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Aarushi Mahajan @ gravityer.com
+2026-01-26 12:33:46 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:33:46 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for aarushi mahajan
+2026-01-26 12:33:46 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:33:46 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['aarushi@gravityer.com', 'aarushi.mahajan@gravityer.com', 'aarushimahajan@gravityer.com', 'amahajan@gravityer.com', 'a.mahajan@gravityer.com', 'aarushim@gravityer.com', 'aarushi.m@gravityer.com', 'mahajan@gravityer.com', 'mahajan.aarushi@gravityer.com', 'mahajanaarushi@gravityer.com', 'aarushi_mahajan@gravityer.com', 'aarushi-mahajan@gravityer.com', 'a-mahajan@gravityer.com', 'aarushi-m@gravityer.com']
+2026-01-26 12:33:47 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:33:47 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Kauser Fathima @ gravityer.com
+2026-01-26 12:33:47 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:33:47 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for kauser fathima
+2026-01-26 12:33:47 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:33:47 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['kauser@gravityer.com', 'kauser.fathima@gravityer.com', 'kauserfathima@gravityer.com', 'kfathima@gravityer.com', 'k.fathima@gravityer.com', 'kauserf@gravityer.com', 'kauser.f@gravityer.com', 'fathima@gravityer.com', 'fathima.kauser@gravityer.com', 'fathimakauser@gravityer.com', 'kauser_fathima@gravityer.com', 'kauser-fathima@gravityer.com', 'k-fathima@gravityer.com', 'kauser-f@gravityer.com']
+2026-01-26 12:33:47 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:33:47 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Aniket Sahoo @ gravityer.com
+2026-01-26 12:33:47 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:33:47 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for aniket sahoo
+2026-01-26 12:33:47 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:33:47 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['aniket@gravityer.com', 'aniket.sahoo@gravityer.com', 'aniketsahoo@gravityer.com', 'asahoo@gravityer.com', 'a.sahoo@gravityer.com', 'anikets@gravityer.com', 'aniket.s@gravityer.com', 'sahoo@gravityer.com', 'sahoo.aniket@gravityer.com', 'sahooaniket@gravityer.com', 'aniket_sahoo@gravityer.com', 'aniket-sahoo@gravityer.com', 'a-sahoo@gravityer.com', 'aniket-s@gravityer.com']
+2026-01-26 12:33:47 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:33:47 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Hasan Samplewala @ gravityer.com
+2026-01-26 12:33:47 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:33:47 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for hasan samplewala
+2026-01-26 12:33:47 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:33:47 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['hasan@gravityer.com', 'hasan.samplewala@gravityer.com', 'hasansamplewala@gravityer.com', 'hsamplewala@gravityer.com', 'h.samplewala@gravityer.com', 'hasans@gravityer.com', 'hasan.s@gravityer.com', 'samplewala@gravityer.com', 'samplewala.hasan@gravityer.com', 'samplewalahasan@gravityer.com', 'hasan_samplewala@gravityer.com', 'hasan-samplewala@gravityer.com', 'h-samplewala@gravityer.com', 'hasan-s@gravityer.com']
+2026-01-26 12:33:48 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:33:48 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Keshav Suman @ gravityer.com
+2026-01-26 12:33:48 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:33:48 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for keshav suman
+2026-01-26 12:33:48 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:33:48 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['keshav@gravityer.com', 'keshav.suman@gravityer.com', 'keshavsuman@gravityer.com', 'ksuman@gravityer.com', 'k.suman@gravityer.com', 'keshavs@gravityer.com', 'keshav.s@gravityer.com', 'suman@gravityer.com', 'suman.keshav@gravityer.com', 'sumankeshav@gravityer.com', 'keshav_suman@gravityer.com', 'keshav-suman@gravityer.com', 'k-suman@gravityer.com', 'keshav-s@gravityer.com']
+2026-01-26 12:33:48 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:33:48 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Tanisha Gupta @ gravityer.com
+2026-01-26 12:33:48 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:33:48 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for tanisha gupta
+2026-01-26 12:33:48 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:33:48 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['tanisha@gravityer.com', 'tanisha.gupta@gravityer.com', 'tanishagupta@gravityer.com', 'tgupta@gravityer.com', 't.gupta@gravityer.com', 'tanishag@gravityer.com', 'tanisha.g@gravityer.com', 'gupta@gravityer.com', 'gupta.tanisha@gravityer.com', 'guptatanisha@gravityer.com', 'tanisha_gupta@gravityer.com', 'tanisha-gupta@gravityer.com', 't-gupta@gravityer.com', 'tanisha-g@gravityer.com']
+2026-01-26 12:33:48 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:33:48 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Arun Shanmugam @ gravityer.com
+2026-01-26 12:33:48 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:33:48 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for arun shanmugam
+2026-01-26 12:33:48 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:33:48 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['arun@gravityer.com', 'arun.shanmugam@gravityer.com', 'arunshanmugam@gravityer.com', 'ashanmugam@gravityer.com', 'a.shanmugam@gravityer.com', 'aruns@gravityer.com', 'arun.s@gravityer.com', 'shanmugam@gravityer.com', 'shanmugam.arun@gravityer.com', 'shanmugamarun@gravityer.com', 'arun_shanmugam@gravityer.com', 'arun-shanmugam@gravityer.com', 'a-shanmugam@gravityer.com', 'arun-s@gravityer.com']
+2026-01-26 12:33:49 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:33:49 | INFO     | LLMEngine            | analyze              | Line:10   | 🤖 Starting LLM analysis for company: gravity engineering services
+2026-01-26 12:33:49 | DEBUG    | LLMEngine            | analyze              | Line:13   | Context string length: 10478 characters
+2026-01-26 12:33:49 | INFO     | LLMEngine            | analyze              | Line:32   | 📡 Sending request to Mistral API (model: mistral-small-latest)
+2026-01-26 12:33:53 | INFO     | LLMEngine            | analyze              | Line:56   | ✅ LLM analysis complete for gravity engineering services. Found 1 people, 31 services
+2026-01-26 12:33:53 | DEBUG    | LLMEngine            | analyze              | Line:61   | Full LLM response: {
+  "company_profile": {
+    "name": "Gravity Engineering Services",
+    "description": "Gravity is a premier talent platform that connects businesses worldwide with the top 3% of global tech talent, driving innovation and accelerating success in software products and services.",
+    "industry": "Information Technology and Services",
+    "hq_address": "Bangalore, India",
+    "country": "India",
+    "annual_revenue": "Not Found"
+  },
+  "services_offered": [
+    "Talent Hire",
+    "Payroll Services",
+    "Consulting Services",
+    "Commerce Solutions",
+    "ERP Solutions",
+    "Cloud Services",
+    "Marketing Analytics",
+    "Generative AI",
+    "CMS Solutions",
+    "PIM & Marketplace Solutions",
+    "Logistics Solutions",
+    "PLM Solutions",
+    "Cyber Security",
+    "AIOps Services",
+    "Hyperscaler Solutions",
+    "Database Solutions",
+    "Search Solutions",
+    "Marketing Solutions",
+    "CRM Solutions",
+    "Customer Service Solutions",
+    "Analytics Solutions",
+    "Data Visualization",
+    "Data Warehousing",
+    "Data Analytics",
+    "Data Lake and Big Data",
+    "Generative AI Services",
+    "MLOps",
+    "AI & Machine Learning",
+    "Computer Vision",
+    "RPA Solutions",
+    "Conversational AI"
+  ],
+  "key_people": [
+    {
+      "name": "Not Found",
+      "role": "Not Found"
+    }
+  ]
+}
+2026-01-26 12:33:53 | INFO     | TokenManager         | _obtain_token        | Line:84   | 🔑 Fetching fresh access token for sankalp@admin.com
+2026-01-26 12:33:54 | INFO     | TokenManager         | _obtain_token        | Line:113  | ✅ Token obtained successfully. Expires in 8.0 hours
+2026-01-26 12:34:00 | INFO     | API_Endpoint         | push_asset_to_master_db | Line:61   | ✅ Asset Saved to Master DB: gravity engineering services
+2026-01-26 12:34:00 | INFO     | API_Endpoint         | save_all_enriched_contacts | Line:126  | ⚠️ No verified contacts to save for gravity engineering services
+2026-01-26 12:34:24 | INFO     | API_Endpoint         | enrich_company       | Line:145  | 🚀 Starting Deep-Scan for: gravity engineering services
+2026-01-26 12:34:27 | WARNING  | Infrastructure_Hunter | detect_server_tech   | Line:74   | Header scan failed: Request URL is missing an 'http://' or 'https://' protocol.
+2026-01-26 12:34:27 | DEBUG    | ScraperService       | fetch_page           | Line:23   | Added https:// protocol to URL: https://gravityer.com
+2026-01-26 12:34:27 | INFO     | ScraperService       | fetch_page           | Line:25   | 🌐 Fetching page: https://gravityer.com
+2026-01-26 12:34:28 | INFO     | ScraperService       | fetch_page           | Line:30   | ✅ Successfully fetched https://gravityer.com (256332 characters, status: 200)
+2026-01-26 12:34:28 | DEBUG    | ScraperService       | extract_data         | Line:43   | Starting data extraction from HTML (256332 characters)
+2026-01-26 12:34:28 | DEBUG    | ScraperService       | extract_data         | Line:82   | Detected technology: React
+2026-01-26 12:34:28 | INFO     | ScraperService       | extract_data         | Line:84   | 📊 Extraction complete: 0 emails, 0 phones, 1 technologies detected
+2026-01-26 12:34:28 | INFO     | Tech_Hunter          | scan                 | Line:56   | 🕵️ Detected Tech: LinkedIn Insights, Google Analytics 4, Vercel
+2026-01-26 12:34:28 | INFO     | Google_Search_Engine | run                  | Line:107  | 🕵️ Hunting leadership for gravity engineering services...
+2026-01-26 12:34:30 | INFO     | API_Endpoint         | enrich_company       | Line:194  | 🕵️ Auto-Enriching All Employees @ gravityer.com
+2026-01-26 12:34:30 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Kumar Gaurav @ gravityer.com
+2026-01-26 12:34:30 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:34:30 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for kumar gaurav
+2026-01-26 12:34:30 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:34:30 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['kumar@gravityer.com', 'kumar.gaurav@gravityer.com', 'kumargaurav@gravityer.com', 'kgaurav@gravityer.com', 'k.gaurav@gravityer.com', 'kumarg@gravityer.com', 'kumar.g@gravityer.com', 'gaurav@gravityer.com', 'gaurav.kumar@gravityer.com', 'gauravkumar@gravityer.com', 'kumar_gaurav@gravityer.com', 'kumar-gaurav@gravityer.com', 'k-gaurav@gravityer.com', 'kumar-g@gravityer.com']
+2026-01-26 12:34:30 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:34:30 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Haseeb Haroon @ gravityer.com
+2026-01-26 12:34:30 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:34:30 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for haseeb haroon
+2026-01-26 12:34:30 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:34:30 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['haseeb@gravityer.com', 'haseeb.haroon@gravityer.com', 'haseebharoon@gravityer.com', 'hharoon@gravityer.com', 'h.haroon@gravityer.com', 'haseebh@gravityer.com', 'haseeb.h@gravityer.com', 'haroon@gravityer.com', 'haroon.haseeb@gravityer.com', 'haroonhaseeb@gravityer.com', 'haseeb_haroon@gravityer.com', 'haseeb-haroon@gravityer.com', 'h-haroon@gravityer.com', 'haseeb-h@gravityer.com']
+2026-01-26 12:34:31 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:34:31 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Puja Rai @ gravityer.com
+2026-01-26 12:34:31 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:34:31 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for puja rai
+2026-01-26 12:34:31 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:34:31 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['puja@gravityer.com', 'puja.rai@gravityer.com', 'pujarai@gravityer.com', 'prai@gravityer.com', 'p.rai@gravityer.com', 'pujar@gravityer.com', 'puja.r@gravityer.com', 'rai@gravityer.com', 'rai.puja@gravityer.com', 'raipuja@gravityer.com', 'puja_rai@gravityer.com', 'puja-rai@gravityer.com', 'p-rai@gravityer.com', 'puja-r@gravityer.com']
+2026-01-26 12:34:31 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:34:31 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Aarushi Mahajan @ gravityer.com
+2026-01-26 12:34:31 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:34:31 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for aarushi mahajan
+2026-01-26 12:34:31 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:34:31 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['aarushi@gravityer.com', 'aarushi.mahajan@gravityer.com', 'aarushimahajan@gravityer.com', 'amahajan@gravityer.com', 'a.mahajan@gravityer.com', 'aarushim@gravityer.com', 'aarushi.m@gravityer.com', 'mahajan@gravityer.com', 'mahajan.aarushi@gravityer.com', 'mahajanaarushi@gravityer.com', 'aarushi_mahajan@gravityer.com', 'aarushi-mahajan@gravityer.com', 'a-mahajan@gravityer.com', 'aarushi-m@gravityer.com']
+2026-01-26 12:34:32 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:34:32 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Tanisha Gupta @ gravityer.com
+2026-01-26 12:34:32 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:34:32 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for tanisha gupta
+2026-01-26 12:34:32 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:34:32 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['tanisha@gravityer.com', 'tanisha.gupta@gravityer.com', 'tanishagupta@gravityer.com', 'tgupta@gravityer.com', 't.gupta@gravityer.com', 'tanishag@gravityer.com', 'tanisha.g@gravityer.com', 'gupta@gravityer.com', 'gupta.tanisha@gravityer.com', 'guptatanisha@gravityer.com', 'tanisha_gupta@gravityer.com', 'tanisha-gupta@gravityer.com', 't-gupta@gravityer.com', 'tanisha-g@gravityer.com']
+2026-01-26 12:34:32 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:34:32 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Keshav Suman @ gravityer.com
+2026-01-26 12:34:32 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:34:32 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for keshav suman
+2026-01-26 12:34:32 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:34:32 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['keshav@gravityer.com', 'keshav.suman@gravityer.com', 'keshavsuman@gravityer.com', 'ksuman@gravityer.com', 'k.suman@gravityer.com', 'keshavs@gravityer.com', 'keshav.s@gravityer.com', 'suman@gravityer.com', 'suman.keshav@gravityer.com', 'sumankeshav@gravityer.com', 'keshav_suman@gravityer.com', 'keshav-suman@gravityer.com', 'k-suman@gravityer.com', 'keshav-s@gravityer.com']
+2026-01-26 12:34:33 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:34:33 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Kauser Fathima @ gravityer.com
+2026-01-26 12:34:33 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:34:33 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for kauser fathima
+2026-01-26 12:34:33 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:34:33 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['kauser@gravityer.com', 'kauser.fathima@gravityer.com', 'kauserfathima@gravityer.com', 'kfathima@gravityer.com', 'k.fathima@gravityer.com', 'kauserf@gravityer.com', 'kauser.f@gravityer.com', 'fathima@gravityer.com', 'fathima.kauser@gravityer.com', 'fathimakauser@gravityer.com', 'kauser_fathima@gravityer.com', 'kauser-fathima@gravityer.com', 'k-fathima@gravityer.com', 'kauser-f@gravityer.com']
+2026-01-26 12:34:34 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:34:34 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Sangeeta Bhagat @ gravityer.com
+2026-01-26 12:34:34 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:34:34 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for sangeeta bhagat
+2026-01-26 12:34:34 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:34:34 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['sangeeta@gravityer.com', 'sangeeta.bhagat@gravityer.com', 'sangeetabhagat@gravityer.com', 'sbhagat@gravityer.com', 's.bhagat@gravityer.com', 'sangeetab@gravityer.com', 'sangeeta.b@gravityer.com', 'bhagat@gravityer.com', 'bhagat.sangeeta@gravityer.com', 'bhagatsangeeta@gravityer.com', 'sangeeta_bhagat@gravityer.com', 'sangeeta-bhagat@gravityer.com', 's-bhagat@gravityer.com', 'sangeeta-b@gravityer.com']
+2026-01-26 12:34:34 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:34:34 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Hasan Samplewala @ gravityer.com
+2026-01-26 12:34:34 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:34:34 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for hasan samplewala
+2026-01-26 12:34:34 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:34:34 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['hasan@gravityer.com', 'hasan.samplewala@gravityer.com', 'hasansamplewala@gravityer.com', 'hsamplewala@gravityer.com', 'h.samplewala@gravityer.com', 'hasans@gravityer.com', 'hasan.s@gravityer.com', 'samplewala@gravityer.com', 'samplewala.hasan@gravityer.com', 'samplewalahasan@gravityer.com', 'hasan_samplewala@gravityer.com', 'hasan-samplewala@gravityer.com', 'h-samplewala@gravityer.com', 'hasan-s@gravityer.com']
+2026-01-26 12:34:35 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:34:35 | DEBUG    | Email_Engine         | generate             | Line:14   | Generating email patterns for: Aniket Sahoo @ gravityer.com
+2026-01-26 12:34:35 | DEBUG    | Email_Engine         | generate             | Line:40   | No known pattern for domain: gravityer.com
+2026-01-26 12:34:35 | INFO     | Email_Engine         | generate             | Line:65   | 📧 Generated 14 email candidates for aniket sahoo
+2026-01-26 12:34:35 | INFO     | Email_Engine         | find_valid_email     | Line:78   | 🔍 Validating 14 email candidates
+2026-01-26 12:34:35 | DEBUG    | Email_Engine         | find_valid_email     | Line:79   | Email candidates: ['aniket@gravityer.com', 'aniket.sahoo@gravityer.com', 'aniketsahoo@gravityer.com', 'asahoo@gravityer.com', 'a.sahoo@gravityer.com', 'anikets@gravityer.com', 'aniket.s@gravityer.com', 'sahoo@gravityer.com', 'sahoo.aniket@gravityer.com', 'sahooaniket@gravityer.com', 'aniket_sahoo@gravityer.com', 'aniket-sahoo@gravityer.com', 'a-sahoo@gravityer.com', 'aniket-s@gravityer.com']
+2026-01-26 12:34:35 | WARNING  | Email_Engine         | find_valid_email     | Line:129  | No valid or risky emails found in validation
+2026-01-26 12:34:35 | INFO     | LLMEngine            | analyze              | Line:10   | 🤖 Starting LLM analysis for company: gravity engineering services
+2026-01-26 12:34:35 | DEBUG    | LLMEngine            | analyze              | Line:13   | Context string length: 10478 characters
+2026-01-26 12:34:35 | INFO     | LLMEngine            | analyze              | Line:32   | 📡 Sending request to Mistral API (model: mistral-small-latest)
+2026-01-26 12:34:38 | INFO     | LLMEngine            | analyze              | Line:56   | ✅ LLM analysis complete for gravity engineering services. Found 1 people, 30 services
+2026-01-26 12:34:38 | DEBUG    | LLMEngine            | analyze              | Line:61   | Full LLM response: {
+  "company_profile": {
+    "name": "Gravity Engineering Services",
+    "description": "Gravity is a premier talent platform that connects businesses worldwide with the top 3% of global tech talent, driving innovation and accelerating success in software products and services.",
+    "industry": "Information Technology and Services",
+    "hq_address": "Bangalore, India",
+    "country": "India",
+    "annual_revenue": "Not Found"
+  },
+  "services_offered": [
+    "Talent Hire",
+    "Payroll Services",
+    "Consulting Services",
+    "Commerce Solutions",
+    "ERP Solutions",
+    "Cloud Services",
+    "Marketing Analytics",
+    "Generative AI",
+    "Digital Commerce",
+    "CMS Solutions",
+    "PIM & Marketplace",
+    "Logistics Solutions",
+    "PLM Solutions",
+    "Cyber Security",
+    "Hyperscaler Solutions",
+    "Database Solutions",
+    "Search Solutions",
+    "CRM Solutions",
+    "Customer Service Solutions",
+    "Analytics Solutions",
+    "Data Visualization",
+    "Data Warehousing",
+    "Data Analytics",
+    "Data Lake and Big Data",
+    "Generative AI Services",
+    "MLOps",
+    "AI & Machine Learning",
+    "Computer Vision",
+    "RPA Solutions",
+    "Conversational AI"
+  ],
+  "key_people": [
+    {
+      "name": "Not Found",
+      "role": "Not Found"
+    }
+  ]
+}
+2026-01-26 12:34:38 | DEBUG    | TokenManager         | get_valid_token      | Line:61   | Using cached token
+2026-01-26 12:34:45 | INFO     | API_Endpoint         | push_asset_to_master_db | Line:61   | ✅ Asset Saved to Master DB: gravity engineering services
+2026-01-26 12:34:45 | INFO     | API_Endpoint         | save_all_enriched_contacts | Line:126  | ⚠️ No verified contacts to save for gravity engineering services

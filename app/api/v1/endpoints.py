@@ -1,7 +1,7 @@
 import httpx
-import os
 import logging
 import traceback
+import asyncio
 from fastapi import APIRouter, BackgroundTasks
 from app.models.schemas import (
     ScanRequest, IntelligenceReport, InfrastructureInfo, 
@@ -27,9 +27,6 @@ token_manager = TokenManager(
     password=settings.SAVE_ENRICHMENT_PASSWORD
 )
 
-# CONFIG: Your Master CRM (Django) details
-MASTER_CRM_URL = os.getenv("MASTER_CRM_URL", "https://salesapi.gravityer.com/api/v1/companies/save_enrichment_data/")
-MASTER_API_KEY = os.getenv("MASTER_API_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY5MTcxNzk2LCJpYXQiOjE3NjkxNDI5OTYsImp0aSI6IjkxMmFlMzM0ZTgyZDQzYTM5YWUxYmIwNmUxMGNhNzA0IiwidXNlcl9pZCI6MSwiYnVzaW5lc3NfcmVjb3JkX2lkIjpudWxsLCJtYXN0ZXJfYWRtaW4iOnRydWV9.b1BYVEndhPXz8x_FL7629OkSOjjw1_k-H7x2iA30Hq4")
 
 def mask_email(email):
     """Turns 'kumar@gravityer.com' into 'k****@gravityer.com'"""
@@ -46,15 +43,19 @@ async def push_asset_to_master_db(data: dict):
     """
     Background Task: Sends the UNMASKED data to your Django CRM.
     This builds your asset library automatically.
+    Uses TokenManager for automatic token refresh.
     """
     try:
+        # Get fresh token dynamically
+        token = await token_manager.get_valid_token()
+        
         async with httpx.AsyncClient() as client:
             # We assume your Django view accepts this JSON structure
             response = await client.post(
-                MASTER_CRM_URL, 
+                settings.SAVE_ENRICHMENT_URL, 
                 json=data, 
-                headers={"Authorization": f"Bearer {MASTER_API_KEY}"},
-                timeout=15
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=30
             )
             if response.status_code < 300:
                 logger.info(f"✅ Asset Saved to Master DB: {data.get('company_profile', {}).get('name')}")
@@ -90,7 +91,7 @@ async def save_enrichment_data(company_data: dict, contact: dict):
                 settings.SAVE_ENRICHMENT_URL,
                 json=payload,
                 headers={"Authorization": f"Bearer {token}"},
-                timeout=15
+                timeout=30
             )
             if response.status_code < 300:
                 logger.info(

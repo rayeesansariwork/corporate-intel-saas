@@ -15,25 +15,41 @@ class AsyncScraper:
         }
 
     async def fetch_page(self, url: str) -> str:
-        if not url: return ""
-        if not url.startswith("http"): url = f"https://{url}"
+        if not url:
+            logger.debug("Empty URL provided to fetch_page")
+            return ""
+        if not url.startswith("http"): 
+            url = f"https://{url}"
+            logger.debug(f"Added https:// protocol to URL: {url}")
             
+        logger.info(f"🌐 Fetching page: {url}")
         async with httpx.AsyncClient(follow_redirects=True, timeout=15.0, verify=False) as client:
             try:
                 resp = await client.get(url, headers=self.headers)
+                content_length = len(resp.text)
+                logger.info(f"✅ Successfully fetched {url} ({content_length} characters, status: {resp.status_code})")
                 return resp.text
+            except httpx.TimeoutException as e:
+                logger.error(f"⏱️ Timeout while fetching {url}: {e}")
+                return ""
+            except httpx.HTTPError as e:
+                logger.error(f"🚫 HTTP error for {url}: {type(e).__name__} - {e}")
+                return ""
             except Exception as e:
-                logger.warning(f"Scrape failed for {url}: {e}")
+                logger.error(f"❌ Unexpected error while fetching {url}: {type(e).__name__} - {e}", exc_info=True)
                 return ""
 
     def extract_data(self, html: str) -> Dict:
+        logger.debug(f"Starting data extraction from HTML ({len(html)} characters)")
         data = {
             "emails": [],
             "phones": [],
             "technologies": [],
             "raw_text": ""
         }
-        if not html: return data
+        if not html:
+            logger.warning("Empty HTML provided to extract_data")
+            return data
             
         soup = BeautifulSoup(html, 'html.parser')
         text = soup.get_text(" ", strip=True)
@@ -63,5 +79,10 @@ class AsyncScraper:
         for tech, patterns in signatures.items():
             if any(p in html_lower for p in patterns):
                 data["technologies"].append(tech)
+                logger.debug(f"Detected technology: {tech}")
 
+        logger.info(
+            f"📊 Extraction complete: {len(data['emails'])} emails, "
+            f"{len(data['phones'])} phones, {len(data['technologies'])} technologies detected"
+        )
         return data

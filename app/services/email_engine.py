@@ -11,7 +11,9 @@ class EmailPermutator:
         """
         Generates corporate email patterns, prioritizing known successful patterns first.
         """
+        logger.debug(f"Generating email patterns for: {full_name} @ {domain}")
         if not full_name or not domain:
+            logger.warning("Missing full_name or domain for email generation")
             return []
 
         # Clean inputs
@@ -34,6 +36,8 @@ class EmailPermutator:
             priority_email = PatternEngine.construct_email(known_pattern, fn, ln, domain)
             candidates.append(priority_email)
             logger.info(f"⚡ Smart Pattern Hit! Prioritizing: {priority_email}")
+        else:
+            logger.debug(f"No known pattern for domain: {domain}")
 
         # 2. The "Big 15" Corporate Patterns (Fallback list)
         standard_patterns = [
@@ -57,7 +61,8 @@ class EmailPermutator:
         for p in standard_patterns:
             if p not in candidates:
                 candidates.append(p)
-                
+        
+        logger.info(f"📧 Generated {len(candidates)} email candidates for {fn} {ln}")
         return candidates
 
 class EmailValidator:
@@ -70,7 +75,11 @@ class EmailValidator:
         Streams email candidates to Validator and returns the first SAFE one.
         Handles SSE format (data: {...})
         """
+        logger.info(f"🔍 Validating {len(email_list)} email candidates")
+        logger.debug(f"Email candidates: {email_list}")
+        
         if not email_list:
+            logger.warning("Empty email list provided for validation")
             return None
 
         # Format for your 'BulkEmailRequest' model
@@ -104,6 +113,7 @@ class EmailValidator:
                                 
                                 # Backup 'risky'
                                 if status == "risky" and not risky_email:
+                                    logger.debug(f"Found RISKY email (backup): {email}")
                                     risky_email = {"email": email, "status": "risky", "score": 50}
 
                             except json.JSONDecodeError:
@@ -115,9 +125,16 @@ class EmailValidator:
             if risky_email:
                 logger.info(f"⚠️ Returning RISKY email: {risky_email['email']}")
                 return risky_email
-                
+            
+            logger.warning("No valid or risky emails found in validation")
             return None
 
+        except httpx.TimeoutException as e:
+            logger.error(f"⏱️ Validator timeout after 30s: {e}")
+            return None
+        except httpx.HTTPError as e:
+            logger.error(f"🚫 HTTP error connecting to validator: {type(e).__name__} - {e}", exc_info=True)
+            return None
         except Exception as e:
-            logger.error(f"Validator Connection Error: {e}")
+            logger.error(f"❌ Validator error: {type(e).__name__} - {e}", exc_info=True)
             return None
