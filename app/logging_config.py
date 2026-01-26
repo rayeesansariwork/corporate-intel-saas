@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 from pathlib import Path
 from datetime import datetime
 
@@ -7,13 +8,10 @@ def setup_logging():
     """
     Configures application-wide logging with both console and file outputs.
     Creates detailed logs for debugging with timestamps, log levels, and module names.
+    In production or when file logging fails, falls back to console-only logging.
     """
-    # Create logs directory if it doesn't exist
-    log_dir = Path("logs")
-    log_dir.mkdir(exist_ok=True)
-    
-    # Create log filename with date
-    log_file = log_dir / f"app_{datetime.now().strftime('%Y%m%d')}.log"
+    # Check if we're in production (Render, Heroku, or other cloud platforms)
+    is_production = os.getenv('RENDER') or os.getenv('DYNO') or os.getenv('PORT')
     
     # Create formatters
     detailed_formatter = logging.Formatter(
@@ -26,12 +24,7 @@ def setup_logging():
         datefmt='%H:%M:%S'
     )
     
-    # File handler (DEBUG level - captures everything)
-    file_handler = logging.FileHandler(log_file, encoding='utf-8')
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(detailed_formatter)
-    
-    # Console handler (INFO level - less verbose)
+    # Console handler (always available)
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(console_formatter)
@@ -43,17 +36,38 @@ def setup_logging():
     # Remove existing handlers to avoid duplicates
     root_logger.handlers.clear()
     
-    # Add handlers
-    root_logger.addHandler(file_handler)
+    # Add console handler
     root_logger.addHandler(console_handler)
     
-    # Set levels for noisy third-party libraries
-    # logging.getLogger("httpx").setLevel(logging.WARNING)
-    # logging.getLogger("httpcore").setLevel(logging.WARNING)
-    # logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-    # logging.getLogger("urllib3").setLevel(logging.WARNING)
+    # Try to add file handler only in non-production environments
+    if not is_production:
+        try:
+            # Create logs directory if it doesn't exist
+            log_dir = Path("logs")
+            log_dir.mkdir(exist_ok=True)
+            
+            # Create log filename with date
+            log_file = log_dir / f"app_{datetime.now().strftime('%Y%m%d')}.log"
+            
+            # File handler (DEBUG level - captures everything)
+            file_handler = logging.FileHandler(log_file, encoding='utf-8')
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(detailed_formatter)
+            
+            root_logger.addHandler(file_handler)
+            logging.info(f"📁 Log file enabled: {log_file}")
+        except (PermissionError, OSError) as e:
+            # File logging failed, continue with console only
+            logging.warning(f"⚠️ File logging disabled (permission issue): {e}")
+    else:
+        logging.info("📋 Production mode: Console logging only")
     
-    # logging.info("=" * 80)
-    # logging.info("🚀 Logging system initialized")
-    # logging.info(f"📁 Log file: {log_file}")
-    # logging.info("=" * 80)
+    # Set levels for noisy third-party libraries
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    
+    logging.info("=" * 80)
+    logging.info("🚀 Logging system initialized")
+    logging.info("=" * 80)
