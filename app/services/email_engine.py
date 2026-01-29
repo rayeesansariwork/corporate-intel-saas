@@ -46,15 +46,15 @@ class EmailPermutator:
             f"{fn}{ln}@{domain}",           # samaltman@openai.com
             f"{fi}{ln}@{domain}",           # saltman@openai.com
             f"{fi}.{ln}@{domain}",          # s.altman@openai.com
-            f"{fn}{li}@{domain}",           # sama@openai.com
-            f"{fn}.{li}@{domain}",          # sam.a@openai.com
-            f"{ln}@{domain}",               # altman@openai.com
-            f"{ln}.{fn}@{domain}",          # altman.sam@openai.com
-            f"{ln}{fn}@{domain}",           # altmansam@openai.com
-            f"{fn}_{ln}@{domain}",          # sam_altman@openai.com
-            f"{fn}-{ln}@{domain}",          # sam-altman@openai.com
-            f"{fi}-{ln}@{domain}",          # s-altman@openai.com
-            f"{fn}-{li}@{domain}",          # sam-a@openai.com
+            # f"{fn}{li}@{domain}",           # sama@openai.com
+            # f"{fn}.{li}@{domain}",          # sam.a@openai.com
+            # f"{ln}@{domain}",               # altman@openai.com
+            # f"{ln}.{fn}@{domain}",          # altman.sam@openai.com
+            # f"{ln}{fn}@{domain}",           # altmansam@openai.com
+            # f"{fn}_{ln}@{domain}",          # sam_altman@openai.com
+            # f"{fn}-{ln}@{domain}",          # sam-altman@openai.com
+            # f"{fi}-{ln}@{domain}",          # s-altman@openai.com
+            # f"{fn}-{li}@{domain}",          # sam-a@openai.com
         ]
         
         # Add standards to list (preserving order, avoiding duplicates)

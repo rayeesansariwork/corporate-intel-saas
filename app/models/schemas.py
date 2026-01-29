@@ -42,3 +42,18 @@ class EmailRevealResponse(BaseModel):
     email: Optional[str] = None
     status: str = "unknown" # safe, risky, unknown
     confidence_score: int = 0
+
+# Cross-Domain Reveal Token Schemas
+class RevealTokenRequest(BaseModel):
+    """Request model for generating cross-domain reveal tokens."""
+    contact_id: int  # Still keep for backwards compatibility
+    company_id: Optional[int] = None  # NEW: For multi-contact reveal
+    company_name: str
+    contact_name: str
+
+
+class RevealTokenResponse(BaseModel):
+    """Response model containing the signed token and redirect URL."""
+    token: str
+    redirect_url: str
+    expires_in_minutes: int

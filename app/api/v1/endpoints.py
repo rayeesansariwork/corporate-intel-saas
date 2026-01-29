@@ -2,11 +2,14 @@ import httpx
 import logging
 import traceback
 import asyncio
+from copy import deepcopy  # Added for proper dict copying
 from fastapi import APIRouter, BackgroundTasks
 from app.models.schemas import (
     ScanRequest, IntelligenceReport, InfrastructureInfo, 
-    EmailRevealRequest, EmailRevealResponse
+    EmailRevealRequest, EmailRevealResponse,
+    RevealTokenRequest, RevealTokenResponse
 )
+
 from app.config import settings
 from app.services.scraper import AsyncScraper
 from app.services.search_engine import DomainHunter, CompanySocialsHunter, EmployeeHunter
@@ -16,6 +19,8 @@ from app.services.email_engine import EmailValidator, EmailPermutator
 from app.services.pattern_engine import PatternEngine
 from app.services.tech_hunter import TechHunter
 from app.services.token_manager import TokenManager
+from app.services.token_generator import TokenGenerator
+
 
 router = APIRouter()
 logger = logging.getLogger("API_Endpoint")
@@ -49,7 +54,7 @@ async def push_asset_to_master_db(data: dict):
         # Get fresh token dynamically
         token = await token_manager.get_valid_token()
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=90.0) as client:  # Increased to 90s
             # We assume your Django view accepts this JSON structure
             response = await client.post(
                 settings.SAVE_ENRICHMENT_URL, 
@@ -67,13 +72,18 @@ async def push_asset_to_master_db(data: dict):
 
 async def save_enrichment_data(company_data: dict, contact: dict):
     """
-    Background Task: Sends individual contact enrichment data to the save endpoint.
-    Each contact with a verified email gets its own database record.
-    Uses TokenManager for automatic token refresh.
+    Save enriched contact data to CRM via API.
+    Now returns BOTH contact_id AND company_id for multi-contact reveal.
     """
     try:
         # Get fresh token dynamically
         token = await token_manager.get_valid_token()
+        
+        if not token:
+            logger.error("🚨 Cannot save contact: CRM auth token unavailable")
+            return None, None
+        
+        logger.info(f"💾 Attempting to save contact: {contact.get('name')} @ {company_data.get('company_profile', {}).get('name')}")
         
         # Prepare contact payload with company context
         payload = {
@@ -86,35 +96,44 @@ async def save_enrichment_data(company_data: dict, contact: dict):
             "sources": company_data.get("sources")
         }
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 settings.SAVE_ENRICHMENT_URL,
                 json=payload,
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=30
+                headers={"Authorization": f"Bearer {token}"}
             )
             if response.status_code < 300:
+                response_data = response.json()
+                contact_id = response_data.get("contact_id")
+                company_id = response_data.get("company_id")  # NEW: Capture company_id
+                
                 logger.info(
                     f"✅ Contact Saved: {contact.get('name')} @ "
-                    f"{company_data.get('company_profile', {}).get('name')}"
+                    f"{company_data.get('company_profile', {}).get('name')} "
+                    f"(Contact ID: {contact_id}, Company ID: {company_id})"
                 )
+                return contact_id, company_id  # Return BOTH IDs
             else:
                 logger.warning(
                     f"⚠️ Contact Save Failed ({contact.get('name')}): "
                     f"{response.status_code} - {response.text}"
                 )
+                return None, None
     except Exception as e:
         logger.error(
             f"❌ Contact Save Error ({contact.get('name', 'Unknown')}): "
             f"{type(e).__name__}: {str(e)}"
         )
         logger.error(f"Full traceback: {traceback.format_exc()}")
+        return None, None
+
 
 
 async def save_all_enriched_contacts(company_data: dict):
     """
     Saves all contacts with verified emails to the database.
-    Sends one API request per contact to ensure all are stored.
+    Sends ONE batch request with ALL contacts to ensure atomicity.
+    Returns a tuple: (dict mapping names to contact IDs, company_id).
     """
     key_people = company_data.get("key_people", [])
     verified_contacts = [
@@ -124,21 +143,48 @@ async def save_all_enriched_contacts(company_data: dict):
     
     if not verified_contacts:
         logger.info(f"⚠️ No verified contacts to save for {company_data.get('company_profile', {}).get('name')}")
-        return
+        return {}, None
     
     logger.info(
         f"💾 Saving {len(verified_contacts)} verified contacts for "
         f"{company_data.get('company_profile', {}).get('name')}"
     )
     
-    # Send each contact individually
-    tasks = [
-        save_enrichment_data(company_data, contact)
-        for contact in verified_contacts
-    ]
+    # Send ALL contacts in ONE batch request to CRM
+    batch_payload = {
+        "company_profile": company_data.get("company_profile", {}),
+        "key_people": verified_contacts
+    }
     
-    # Execute all saves concurrently
-    await asyncio.gather(*tasks, return_exceptions=True)
+    try:
+        async with httpx.AsyncClient(timeout=90.0) as client:  # Increased to 90s for batch operations
+            response = await client.post(
+                settings.SAVE_ENRICHMENT_URL,
+                json=batch_payload,
+                headers={"Authorization": f"Bearer {await token_manager.get_valid_token()}"}
+            )
+            
+            if response.status_code in [200, 201]:
+                result = response.json()
+                company_id = result.get("company_id")
+                saved_contacts = result.get("contacts", [])
+                
+                # Build contact_id map from batch response
+                contact_id_map = {
+                    contact["name"]: contact["contact_id"] 
+                    for contact in saved_contacts
+                }
+                
+                logger.info(f"✅ Batch saved {len(saved_contacts)} contacts for company {company_id}")
+                return contact_id_map, company_id
+            else:
+                logger.error(f"❌ Batch save failed: {response.status_code} - {response.text}")
+                return {}, None
+                
+    except Exception as e:
+        logger.error(f"❌ Exception during batch save: {e}")
+        return {}, None
+
 
 @router.post("/enrich", response_model=IntelligenceReport)
 async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks):
@@ -206,8 +252,9 @@ async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks
                 master_db_employees[i]['email_status'] = "verified"
                 
                 # B. Update Frontend List (Masked Email)
-                person['email'] = None # Hide from frontend
-                person['email_preview'] = mask_email(real_email)
+                masked = mask_email(real_email)
+                person['email'] = masked  # FIXED: Use masked email instead of None
+                person['email_preview'] = masked  # Keep for backwards compatibility
                 person['email_status'] = "verified" # Signals frontend to show Green Lock
             else:
                 person['email_status'] = "not_found"
@@ -247,18 +294,38 @@ async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks
     }
 
     # Construct the Asset Report (Unmasked)
-    # We replace the people list with the one containing real emails
-    asset_report = public_report.copy()
+    # CRITICAL: Use deepcopy to avoid modifying public_report!
+    asset_report = deepcopy(public_report)  # FIXED: was .copy() which is shallow
     asset_report["key_people"] = master_db_employees
 
     # --- 8. FIRE AND FORGET SAVE ---
     background_tasks.add_task(push_asset_to_master_db, asset_report)
     
-    # --- 9. AUTO-SAVE ALL ENRICHED CONTACTS ---
-    # Send each verified contact individually to ensure all are stored
-    background_tasks.add_task(save_all_enriched_contacts, public_report)
+    # --- 9. SAVE CONTACTS SYNCHRONOUSLY & ATTACH CONTACT IDs + COMPANY_ID ---
+    # IMPORTANT: Use asset_report (real emails) not public_report (masked emails)
+    # Wait for contact saves to complete so we can include contact_ids in response
+    contact_id_map, company_id = await save_all_enriched_contacts(asset_report)
+    
+    logger.info(f"🏢 Company ID for all contacts: {company_id}")
+    
+    # Attach contact_ids AND company_id to the PUBLIC report's key_people entries
+    logger.info(f"🔍 Attaching IDs from contact_id_map: {contact_id_map}")
+    
+    for person in public_report["key_people"]:
+        person_name = person.get("name")
+        email_status = person.get("email_status")
+        
+        logger.info(f"Processing {person_name}: email_status={email_status}, in_map={person_name in contact_id_map}")
+        
+        if person_name and person_name in contact_id_map:
+            person["contact_id"] = contact_id_map[person_name]
+            person["company_id"] = company_id  # NEW: Attach company_id for multi-contact reveal
+            logger.info(f"✅ Attached IDs to {person_name}: contact_id={person['contact_id']}, company_id={company_id}")
+        elif email_status == "verified":
+            logger.warning(f"⚠️ {person_name} has verified email but NOT in contact_id_map!")
 
     return public_report
+
 
 @router.post("/reveal-email", response_model=EmailRevealResponse)
 async def reveal_email(request: EmailRevealRequest):
@@ -313,3 +380,49 @@ async def reveal_email(request: EmailRevealRequest):
         }
     
     return {"email": None, "status": "not_found", "confidence_score": 0}
+
+
+@router.post("/generate-reveal-token", response_model=RevealTokenResponse)
+async def generate_reveal_token(request: RevealTokenRequest):
+    """
+    Generate a signed JWT token for cross-domain contact reveal.
+    
+    This endpoint creates a secure, time-limited token that encodes contact
+    information for transfer to the CRM landing page. The token is valid for
+    5 minutes and cryptographically signed to prevent tampering.
+    
+    Args:
+        request: Contains contact_id, company_name, and contact_name
+        
+    Returns:
+        Token and redirect URL for CRM landing page
+    """
+    logger.info(
+        f"🎟️ Generating reveal token for {request.contact_name} @ "
+        f"{request.company_name} (Contact ID: {request.contact_id})"
+    )
+    
+    # Initialize token generator
+    token_gen = TokenGenerator(
+        secret_key=settings.JWT_SECRET_KEY,
+        expiration_minutes=settings.JWT_EXPIRATION_MINUTES
+    )
+    
+    # Generate signed token
+    token = token_gen.generate_token(
+        contact_id=request.contact_id,
+        company_name=request.company_name,
+        contact_name=request.contact_name,
+        company_id=request.company_id  # NEW: For multi-contact reveal
+    )
+    
+    # Build redirect URL with token as query parameter
+    redirect_url = f"{settings.CRM_LANDING_PAGE_URL}?reveal_token={token}"
+    
+    logger.info(f"✅ Token generated successfully, expires in {settings.JWT_EXPIRATION_MINUTES} minutes")
+    
+    return {
+        "token": token,
+        "redirect_url": redirect_url,
+        "expires_in_minutes": settings.JWT_EXPIRATION_MINUTES
+    }

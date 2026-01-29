@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     SAVE_ENRICHMENT_PASSWORD: str
     TOKEN_OBTAIN_URL: str
     
+    # Cross-Domain Reveal Token Settings
+    JWT_SECRET_KEY: str = "change_this_to_match_crm_backend_secret"
+    JWT_EXPIRATION_MINUTES: int = 5
+    # CRM_LANDING_PAGE_URL: str = "http://localhost:3000/agency/dashboard"
+    CRM_LANDING_PAGE_URL: str = "https://sales.polluxa.com/agency/dashboard"
     # Search Engine (Serper.dev)
     # I have added your key here as the default
     SERPER_API_KEY: str 
