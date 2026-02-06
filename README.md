@@ -411,10 +411,11 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 ## Contact
 
 **Developer:** Rayees Ansari  
+**Email:** [rayeesansari.work@gmail.com](mailto:rayeesansari.work@gmail.com)
 **GitHub:** [@rayeesansariwork](https://github.com/rayeesansariwork)  
 **Repository:** [https://github.com/rayeesansariwork/corporate-intel-saas](https://github.com/rayeesansariwork/corporate-intel-saas)
+**LinkedIn:** [https://www.linkedin.com/in/mdrayeesansari](https://www.linkedin.com/in/mdrayeesansari)
 
----
 
 ## Acknowledgments
 
