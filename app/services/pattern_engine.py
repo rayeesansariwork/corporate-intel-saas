@@ -51,15 +51,22 @@ class PatternEngine:
     
     @classmethod
     def _save_patterns(cls):
-        """Persist patterns from memory cache to JSON file."""
+        """
+        Persist patterns from memory cache to JSON file.
+        Gracefully handles file write failures in cloud/containerized environments.
+        """
         cls._ensure_storage_dir()
         
         try:
             with open(cls._STORAGE_PATH, 'w') as f:
                 json.dump(cls._pattern_cache, f, indent=2)
             logger.debug(f"💾 Saved {len(cls._pattern_cache)} patterns to storage")
+        except (PermissionError, OSError) as e:
+            # Silently handle filesystem issues in cloud deployments (Render, etc.)
+            # Pattern engine will continue working in memory-only mode
+            logger.debug(f"⚠️ Pattern persistence unavailable (running in memory-only mode): {e}")
         except Exception as e:
-            logger.error(f"❌ Failed to save patterns: {e}")
+            logger.warning(f"⚠️ Pattern save failed, continuing in memory: {e}")
     
     @staticmethod
     def deduce_pattern(valid_email: str, first_name: str, last_name: str, domain: str) -> Optional[str]:
