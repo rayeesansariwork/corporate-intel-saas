@@ -2,8 +2,10 @@ import httpx
 import logging
 import traceback
 import asyncio
+import json
 from copy import deepcopy  # Added for proper dict copying
 from fastapi import APIRouter, BackgroundTasks
+from fastapi.responses import StreamingResponse
 from app.models.schemas import (
     ScanRequest, IntelligenceReport, InfrastructureInfo, 
     EmailRevealRequest, EmailRevealResponse,
@@ -329,6 +331,159 @@ async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks
             logger.warning(f"⚠️ {person_name} has verified email but NOT in contact_id_map!")
 
     return public_report
+
+
+@router.post("/enrich-stream")
+async def enrich_company_stream(request: ScanRequest, background_tasks: BackgroundTasks):
+    """
+    Streaming version of /enrich - sends data progressively as it becomes available.
+    Uses Server-Sent Events (SSE) for real-time updates.
+    """
+    async def event_generator():
+        try:
+            logger.info(f"🚀 Streaming Deep-Scan for: {request.company_name}")
+            
+            # --- 1. Initialization & Domain ---
+            scraper = AsyncScraper()
+            llm = LLMEngine()
+            
+            target_url = request.website_url
+            if not target_url:
+                target_url = DomainHunter(request.company_name).get_domain()
+            
+            clean_domain = ""
+            if target_url:
+                clean_domain = target_url.replace("https://", "").replace("http://", "").replace("www.", "").split("/")[0]
+
+            # --- 2. Infrastructure Scan ---
+            infra_data = InfrastructureInfo(email_provider="Unknown", cloud_hosting=[])
+            if target_url:
+                infra_hunter = InfrastructureHunter(target_url)
+                email_provider = infra_hunter.detect_email_provider()
+                server_tech = await infra_hunter.detect_server_tech(target_url)
+                infra_data = InfrastructureInfo(email_provider=email_provider, cloud_hosting=server_tech)
+
+            # --- 3. Scrape Website ---
+            scraped_data = {"technologies": [], "emails": [], "phones": [], "raw_text": ""}
+            socials_hunter = CompanySocialsHunter(request.company_name)
+            
+            if target_url:
+                html = await scraper.fetch_page(target_url)
+                scraped_data = scraper.extract_data(html)
+                socials_hunter.extract_from_html(html)
+                
+                tech_hunter = TechHunter()
+                marketing_tech = tech_hunter.scan(html)
+                current_tech = scraped_data.get("technologies", [])
+                scraped_data["technologies"] = list(set(current_tech + marketing_tech))
+            
+            # --- 4. AI Analysis (in parallel with socials) ---
+            ai_task = asyncio.create_task(llm.analyze(request.company_name, scraped_data, []))
+            
+            # --- STREAM EVENT 1: Company Profile Ready (~1-2s) ---
+            logger.info("📡 Streaming Stage 1: Company Profile")
+            yield f"data: {json.dumps({'stage': 'company_profile', 'progress': 25, 'data': {'company_profile': {'name': request.company_name, 'website': target_url or 'Not Found'}, 'infrastructure': infra_data.model_dump() if hasattr(infra_data, 'model_dump') else infra_data, 'technologies': scraped_data['technologies'], 'contact_details': {'emails': scraped_data['emails'], 'phones': scraped_data['phones'], 'social_links': {}, 'addresses': []}}})}\n\n"
+            
+            # --- 5. Socials & Employees ---
+            socials = socials_hunter.run_backup_search()
+            employees = EmployeeHunter(request.company_name, target_role=request.target_role).run()
+            
+            # Wait for AI analysis
+            ai_insights = await ai_task
+            
+            # Merge AI-found people
+            existing_names = {p['name'].lower() for p in employees}
+            for p in ai_insights.get("key_people", []):
+                if isinstance(p, dict) and p.get("name", "").lower() not in existing_names:
+                    if "not found" not in p.get("name", "").lower():
+                        employees.append(p)
+            
+            # --- STREAM EVENT 2: Key People Found (~3-5s) ---
+            logger.info(f"📡 Streaming Stage 2: {len(employees)} Key People")
+            profile = ai_insights.get("company_profile", {})
+            profile["name"] = request.company_name
+            profile["website"] = target_url if target_url else "Not Found"
+            
+            yield f"data: {json.dumps({'stage': 'key_people', 'progress': 50, 'data': {'company_profile': profile, 'services': ai_insights.get('services_offered', []), 'key_people': employees, 'contact_details': {'emails': scraped_data['emails'], 'phones': scraped_data['phones'], 'social_links': socials, 'addresses': []}}})}\n\n"
+            
+            # --- 6. Email Enrichment ---
+            email_engine = EmailPermutator()
+            validator = EmailValidator()
+            master_db_employees = [p.copy() for p in employees]
+            
+            if clean_domain:
+                logger.info(f"🕵️ Auto-Enriching {len(employees)} Employees @ {clean_domain}")
+                for i, person in enumerate(employees):
+                    candidates = email_engine.generate(person['name'], clean_domain)
+                    result = await validator.find_valid_email(
+                        email_list=candidates,
+                        full_name=person['name'],
+                        domain=clean_domain
+                    )
+                    
+                    if result and result.get("status") == "safe":
+                        real_email = result['email']
+                        master_db_employees[i]['email'] = real_email
+                        master_db_employees[i]['email_status'] = "verified"
+                        
+                        masked = mask_email(real_email)
+                        person['email'] = masked
+                        person['email_preview'] = masked
+                        person['email_status'] = "verified"
+                    else:
+                        person['email_status'] = "not_found"
+                        master_db_employees[i]['email_status'] = "not_found"
+                    
+                    # Stream progress after each email validation
+                    if (i + 1) % 3 == 0 or i == len(employees) - 1:  # Update every 3 people or at end
+                        progress = 50 + int((i + 1) / len(employees) * 25)  # 50-75%
+                        logger.info(f"📡 Streaming Email Progress: {i+1}/{len(employees)}")
+                        yield f"data: {json.dumps({'stage': 'email_validation', 'progress': progress, 'data': {'key_people': employees}})}\n\n"
+            
+            # --- 7. Final Report ---
+            public_report = {
+                "company_profile": profile,
+                "infrastructure": infra_data.model_dump() if hasattr(infra_data, 'model_dump') else infra_data,
+                "technologies": scraped_data["technologies"],
+                "services": ai_insights.get("services_offered", []),
+                "contact_details": {
+                    "emails": scraped_data["emails"],
+                    "phones": scraped_data["phones"],
+                    "social_links": socials,
+                    "addresses": []
+                },
+                "key_people": employees,
+                "sources": [target_url if target_url else "Google Serper"]
+            }
+            
+            # Construct asset report for DB
+            asset_report = deepcopy(public_report)
+            asset_report["key_people"] = master_db_employees
+            
+            # --- 8. Save to DB (Fire and Forget) ---
+            background_tasks.add_task(push_asset_to_master_db, asset_report)
+            
+            # --- 9. Save Contacts & Attach IDs ---
+            contact_id_map, company_id = await save_all_enriched_contacts(asset_report)
+            
+            # Attach IDs to public report
+            for person in public_report["key_people"]:
+                person_name = person.get("name")
+                if person_name and person_name in contact_id_map:
+                    person["contact_id"] = contact_id_map[person_name]
+                    person["company_id"] = company_id
+            
+            # --- STREAM EVENT 3: Complete (100%) ---
+            logger.info("📡 Streaming Stage 3: Complete")
+            yield f"data: {json.dumps({'stage': 'complete', 'progress': 100, 'data': public_report})}\n\n"
+            
+        except Exception as e:
+            logger.error(f"❌ Streaming error: {type(e).__name__}: {str(e)}")
+            logger.error(f"Full traceback: {traceback.format_exc()}")
+            yield f"data: {json.dumps({'stage': 'error', 'error': str(e)})}\n\n"
+    
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
 
 
 @router.post("/reveal-email", response_model=EmailRevealResponse)
