@@ -43,5 +43,14 @@
     "first_seen": "2026-02-06T15:03:47.655113",
     "last_used": "2026-02-06T15:03:47.655643",
     "example_email": "jdoe@priority-test.com"
+  },
+  "test.com": {
+    "pattern": "{fn}.{ln}",
+    "success_count": 1,
+    "total_attempts": 1,
+    "confidence": 1.0,
+    "first_seen": "2026-02-06T15:28:00.767049",
+    "last_used": "2026-02-06T15:28:00.767049",
+    "example_email": "test@test.com"
   }
 }
