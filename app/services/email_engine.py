@@ -9,7 +9,12 @@ class EmailPermutator:
     @staticmethod
     def generate(full_name: str, domain: str):
         """
-        Generates corporate email patterns, prioritizing known successful patterns first.
+        Generates corporate email patterns with intelligent prioritization.
+        
+        NEW BEHAVIOR:
+        - If domain has high-confidence pattern (>75%), returns ONLY that email (fast-track)
+        - Otherwise, generates all standard patterns for brute force validation
+        - This dramatically reduces API calls for known domains (1 vs 12+)
         """
         logger.debug(f"Generating email patterns for: {full_name} @ {domain}")
         if not full_name or not domain:
@@ -30,31 +35,42 @@ class EmailPermutator:
 
         candidates = []
 
-        # 1. SMART CHECK: Do we already know the pattern for this domain?
+        # 🚀 SMART FAST-TRACK MODE: Check if we should use single pattern
+        if PatternEngine.should_use_fast_track(domain):
+            pattern_data = PatternEngine.get_pattern_with_confidence(domain)
+            if pattern_data:
+                pattern = pattern_data['pattern']
+                confidence = pattern_data['confidence']
+                priority_email = PatternEngine.construct_email(pattern, fn, ln, domain)
+                
+                logger.info(f"⚡ FAST-TRACK MODE! Using high-confidence pattern for {domain}")
+                logger.info(f"   Pattern: {pattern} | Confidence: {confidence:.1%} | Email: {priority_email}")
+                
+                return [priority_email]  # Return ONLY this email for validation
+        
+        # 🔄 STANDARD MODE: Try known pattern first, then fallback patterns
         known_pattern = PatternEngine.get_pattern(domain)
         if known_pattern:
             priority_email = PatternEngine.construct_email(known_pattern, fn, ln, domain)
             candidates.append(priority_email)
-            logger.info(f"⚡ Smart Pattern Hit! Prioritizing: {priority_email}")
+            logger.info(f"⚡ Known Pattern Priority: {priority_email} (pattern: {known_pattern})")
         else:
             logger.debug(f"No known pattern for domain: {domain}")
 
-        # 2. The "Big 15" Corporate Patterns (Fallback list)
+        # Add standard patterns as fallback (deduplicating if priority email exists)
         standard_patterns = [
             f"{fn}@{domain}",               # sam@openai.com
             f"{fn}.{ln}@{domain}",          # sam.altman@openai.com
             f"{fn}{ln}@{domain}",           # samaltman@openai.com
             f"{fi}{ln}@{domain}",           # saltman@openai.com
             f"{fi}.{ln}@{domain}",          # s.altman@openai.com
-            # f"{fn}{li}@{domain}",           # sama@openai.com
-            # f"{fn}.{li}@{domain}",          # sam.a@openai.com
-            # f"{ln}@{domain}",               # altman@openai.com
-            # f"{ln}.{fn}@{domain}",          # altman.sam@openai.com
-            # f"{ln}{fn}@{domain}",           # altmansam@openai.com
-            # f"{fn}_{ln}@{domain}",          # sam_altman@openai.com
-            # f"{fn}-{ln}@{domain}",          # sam-altman@openai.com
-            # f"{fi}-{ln}@{domain}",          # s-altman@openai.com
-            # f"{fn}-{li}@{domain}",          # sam-a@openai.com
+            f"{fn}{li}@{domain}",           # sama@openai.com
+            f"{fn}.{li}@{domain}",          # sam.a@openai.com
+            f"{ln}@{domain}",               # altman@openai.com
+            f"{ln}.{fn}@{domain}",          # altman.sam@openai.com
+            f"{ln}{fn}@{domain}",           # altmansam@openai.com
+            f"{fn}_{ln}@{domain}",          # sam_altman@openai.com
+            f"{fn}-{ln}@{domain}",          # sam-altman@openai.com
         ]
         
         # Add standards to list (preserving order, avoiding duplicates)
@@ -65,15 +81,23 @@ class EmailPermutator:
         logger.info(f"📧 Generated {len(candidates)} email candidates for {fn} {ln}")
         return candidates
 
+
 class EmailValidator:
     def __init__(self):
         # Ensure this matches your Ngrok URL
-        self.validator_url = "https://beautifully-unpleasing-chasidy.ngrok-free.dev/verify/bulk/stream"
+        self.validator_url = "https://yelping-noelani-gravityer-a1962991.koyeb.app/verify/bulk/stream"
 
-    async def find_valid_email(self, email_list: list):
+    async def find_valid_email(self, email_list: list, full_name: str = None, domain: str = None):
         """
         Streams email candidates to Validator and returns the first SAFE one.
         Handles SSE format (data: {...})
+        
+        NEW: Automatically learns and saves email patterns after successful validation
+        
+        Args:
+            email_list: List of email candidates to validate
+            full_name: Full name of person (used for pattern learning)
+            domain: Email domain (used for pattern learning)
         """
         logger.info(f"🔍 Validating {len(email_list)} email candidates")
         logger.debug(f"Email candidates: {email_list}")
@@ -87,6 +111,7 @@ class EmailValidator:
         
         found_email = None
         risky_email = None
+        used_fast_track = len(email_list) == 1  # True if we only validated 1 email
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -109,7 +134,13 @@ class EmailValidator:
                                 # LOGIC: Stop immediately if 'safe'
                                 if status == "safe":
                                     logger.info(f"✅ Found SAFE email: {email}")
-                                    return {"email": email, "status": "safe", "score": 100}
+                                    found_email = {"email": email, "status": "safe", "score": 100}
+                                    
+                                    # 🧠 PATTERN LEARNING: Learn from this successful validation
+                                    if full_name and domain:
+                                        self._learn_pattern(email, full_name, domain, used_fast_track)
+                                    
+                                    return found_email
                                 
                                 # Backup 'risky'
                                 if status == "risky" and not risky_email:
@@ -124,7 +155,17 @@ class EmailValidator:
             # If stream finishes without 'safe', return 'risky'
             if risky_email:
                 logger.info(f"⚠️ Returning RISKY email: {risky_email['email']}")
+                
+                # Also learn from risky emails (with lower confidence)
+                if full_name and domain:
+                    self._learn_pattern(risky_email['email'], full_name, domain, used_fast_track)
+                
                 return risky_email
+            
+            # 📉 PATTERN FAILURE: Update stats if fast-track failed
+            if used_fast_track and domain:
+                PatternEngine.update_pattern_stats(domain, success=False)
+                logger.warning(f"❌ Fast-track pattern failed for {domain}. Will use brute force next time.")
             
             logger.warning("No valid or risky emails found in validation")
             return None
@@ -138,3 +179,43 @@ class EmailValidator:
         except Exception as e:
             logger.error(f"❌ Validator error: {type(e).__name__} - {e}", exc_info=True)
             return None
+    
+    def _learn_pattern(self, valid_email: str, full_name: str, domain: str, used_fast_track: bool):
+        """
+        Learn email pattern from a successful validation.
+        
+        Args:
+            valid_email: The validated email address
+            full_name: Full name of the person  
+            domain: Email domain
+            used_fast_track: Whether we used fast-track mode (single email)
+        """
+        try:
+            parts = full_name.lower().strip().split()
+            if len(parts) < 2:
+                return  # Can't deduce pattern from single name
+            
+            fn, ln = parts[0], parts[-1]
+            
+            # Deduce the pattern from the valid email
+            deduced_pattern = PatternEngine.deduce_pattern(valid_email, fn, ln, domain)
+            
+            if deduced_pattern:
+                if used_fast_track:
+                    # Fast-track worked! Update success stats
+                    PatternEngine.update_pattern_stats(domain, success=True)
+                    logger.info(f"✅ Fast-track pattern confirmed for {domain}")
+                else:
+                    # New pattern learned via brute force
+                    PatternEngine.save_pattern(
+                        domain=domain,
+                        pattern=deduced_pattern,
+                        example_email=valid_email,
+                        success=True
+                    )
+                    logger.info(f"🧠 Learned NEW pattern for {domain}: {deduced_pattern}")
+            else:
+                logger.debug(f"Could not deduce pattern from {valid_email}")
+                
+        except Exception as e:
+            logger.error(f"❌ Pattern learning error: {e}")

@@ -1,0 +1,47 @@
+{
+  "openai.com": {
+    "pattern": "{fn}{ln}",
+    "success_count": 1,
+    "total_attempts": 1,
+    "confidence": 1.0,
+    "first_seen": "2026-02-06T15:03:47.648334",
+    "last_used": "2026-02-06T15:03:47.648334",
+    "example_email": "samaltman@openai.com"
+  },
+  "testdomain.com": {
+    "pattern": "{fn}.{ln}",
+    "success_count": 5,
+    "total_attempts": 6,
+    "confidence": 0.8333333333333334,
+    "first_seen": "2026-02-06T15:03:47.649366",
+    "last_used": "2026-02-06T15:03:47.650442",
+    "example_email": "test@testdomain.com"
+  },
+  "google.com": {
+    "pattern": "{fn}{ln}",
+    "success_count": 10,
+    "total_attempts": 10,
+    "confidence": 1.0,
+    "first_seen": "2026-02-06T15:03:47.650956",
+    "last_used": "2026-02-06T15:03:47.653521",
+    "example_email": "johnsmith@google.com"
+  },
+  "lowconf.com": {
+    "pattern": "{fn}.{ln}",
+    "success_count": 1,
+    "total_attempts": 2,
+    "confidence": 0.5,
+    "first_seen": "2026-02-06T15:03:47.654036",
+    "last_used": "2026-02-06T15:03:47.654527",
+    "example_email": "test@lowconf.com"
+  },
+  "priority-test.com": {
+    "pattern": "{fi}{ln}",
+    "success_count": 1,
+    "total_attempts": 2,
+    "confidence": 0.5,
+    "first_seen": "2026-02-06T15:03:47.655113",
+    "last_used": "2026-02-06T15:03:47.655643",
+    "example_email": "jdoe@priority-test.com"
+  }
+}

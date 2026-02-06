@@ -240,9 +240,13 @@ async def enrich_company(request: ScanRequest, background_tasks: BackgroundTasks
         logger.info(f"🕵️ Auto-Enriching All Employees @ {clean_domain}")
         # Validate ALL employees to save complete contact data
         for i, person in enumerate(employees):
-            # Generate & Validate
+            # Generate & Validate (with pattern learning)
             candidates = email_engine.generate(person['name'], clean_domain)
-            result = await validator.find_valid_email(candidates)
+            result = await validator.find_valid_email(
+                email_list=candidates,
+                full_name=person['name'],
+                domain=clean_domain
+            )
             
             if result and result.get("status") == "safe":
                 real_email = result['email']
@@ -344,27 +348,16 @@ async def reveal_email(request: EmailRevealRequest):
     if not candidates:
         return {"status": "failed", "email": None, "confidence_score": 0}
 
-    # 2. Validate
+    # 2. Validate (with automatic pattern learning)
     validator = EmailValidator()
-    result = await validator.find_valid_email(candidates)
+    result = await validator.find_valid_email(
+        email_list=candidates,
+        full_name=request.full_name,
+        domain=request.domain
+    )
     
     if result and result["status"] == "safe":
-        # --- SMART LEARNING LOGIC ---
-        try:
-            parts = request.full_name.lower().strip().split()
-            if len(parts) >= 2:
-                fn, ln = parts[0], parts[-1]
-                
-                # Deduce the pattern from the valid email
-                pattern = PatternEngine.deduce_pattern(result["email"], fn, ln, request.domain)
-                
-                # Save it to our 'Database'
-                if pattern:
-                    PatternEngine.save_pattern(request.domain, pattern)
-        except Exception as e:
-            logger.warning(f"Failed to learn pattern: {e}")
-        # -----------------------------
-
+        # Pattern learning now happens automatically inside validator
         return {
             "email": result["email"],
             "status": result["status"],
