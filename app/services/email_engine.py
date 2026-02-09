@@ -85,7 +85,7 @@ class EmailPermutator:
 class EmailValidator:
     def __init__(self):
         # Ensure this matches your Ngrok URL
-        self.validator_url = "https://yelping-noelani-gravityer-a1962991.koyeb.app/verify/bulk/stream"
+        self.validator_url = "https://distant-kally-driveher-244e5c58.koyeb.app/verify/bulk/stream"
 
     async def find_valid_email(self, email_list: list, full_name: str = None, domain: str = None):
         """
