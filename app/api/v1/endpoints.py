@@ -426,9 +426,9 @@ async def enrich_company_stream(request: ScanRequest, background_tasks: Backgrou
                         master_db_employees[i]['email'] = real_email
                         master_db_employees[i]['email_status'] = "verified"
                         
-                        masked = mask_email(real_email)
-                        person['email'] = masked
-                        person['email_preview'] = masked
+                        # STREAMING: Send unmasked emails (no masking for this endpoint)
+                        person['email'] = real_email
+                        person['email_preview'] = real_email
                         person['email_status'] = "verified"
                     else:
                         person['email_status'] = "not_found"
